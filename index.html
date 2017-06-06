@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CSV TO JSON</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            html {
+                font-family: Helvetica, Arial, sans-serif;
+                font-size: 100%;
+                background: #333;
+            }
+
+            #page-wrapper {
+                width: 100%;
+                background: #FFF;
+                /*padding: 1em;*/
+                margin: 2em auto;
+                min-height: 300px;
+                border-top: 5px solid #69c773;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            }
+
+            h1 {
+                margin-top: 0;
+            }
+
+            img {
+                max-width: 100%;
+            }
+
+            #fileDisplayArea {
+                margin-top: 2em;
+                width: 100%;
+                overflow-x: auto;
+            }
+
+        </style>
+
+    </head>
+    <body>
+        <!--<div>CSV TO JSON</div>-->
+
+        <div id="page-wrapper">
+            <div style="padding: 20px">
+
+                <h1>Convert CSV File to JSON</h1>
+                <div>
+                    Select a text file: 
+                    <input type="file" id="fileInput">
+                </div>
+                <pre style="display: none" id="fileDisplayArea"></pre>
+                <h1>--------OR---------</h1>
+                <textarea id="input" rows="10" cols="10" style="width: 100%"></textarea>
+                <textarea id="output" rows="10" cols="10" style="width: 100%"></textarea>
+                <button type="button" id="convert" style="padding: 10px;background: green;color: #fff;font-size: 16px;cursor: pointer">CONVERT JSON</button>
+            </div>
+        </div>
+
+        <script>
+
+            window.onload = function () {
+                var fileInput = document.getElementById('fileInput');
+                var fileDisplayArea = document.getElementById('fileDisplayArea');
+
+                fileInput.addEventListener('change', function (e) {
+                    var file = fileInput.files[0];
+                    var textType = /text.*/;
+
+                    if (file.type.match(textType)) {
+                        var reader = new FileReader();
+
+                        reader.onload = function (e) {
+                            fileDisplayArea.innerText = reader.result;
+                            document.getElementById("input").value = reader.result;
+                        }
+
+                        reader.readAsText(file);
+                    } else {
+                        fileDisplayArea.innerText = "File not supported!"
+                        document.getElementById("input").value = "File not supported!"
+                    }
+                });
+            }
+
+            function CSVToArray(strData, strDelimiter) {
+                strDelimiter = (strDelimiter || ",");
+                var objPattern = new RegExp((
+                        "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
+                        "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+                        "([^\"\\" + strDelimiter + "\\r\\n]*))"), "gi");
+                var arrData = [[]];
+                var arrMatches = null;
+                while (arrMatches = objPattern.exec(strData)) {
+                    var strMatchedDelimiter = arrMatches[1];
+
+                    if (strMatchedDelimiter.length && (strMatchedDelimiter != strDelimiter)) {
+                        arrData.push([]);
+                    }
+                    var strMatchedValue = "";
+                    if (arrMatches[2]) {
+                        strMatchedValue = arrMatches[2].replace(
+                                new RegExp("\"\"", "g"), "\"");
+                    } else {
+                        strMatchedValue = arrMatches[3];
+                    }
+                    arrData[arrData.length - 1].push(strMatchedValue);
+                }
+                return (arrData);
+            }
+
+            function CSV2JSON(csv) {
+                var array = CSVToArray(csv);
+
+                var objArray = [];
+                for (var i = 1; i < array.length; i++) {
+                    objArray[i - 1] = {};
+                    for (var k = 0; k < array[0].length && k < array[i].length; k++) {
+                        var key = array[0][k];
+                        objArray[i - 1][key] = array[i][k]
+                    }
+                }
+
+                var json = JSON.stringify(objArray);
+                var str = json.replace(/},/g, "},\r\n");
+                return str;
+            }
+            document.getElementById("convert").addEventListener("click", function () {
+                var input = document.getElementById("input").value;
+                var output = CSV2JSON(input);
+                document.getElementById("output").value = output;
+            })
+        </script>
+    </body>
+</html>
