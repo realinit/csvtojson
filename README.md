@@ -8,5 +8,5 @@
  
  # you can preview please click below link 
  
- https://htmlpreview.github.io/?https://github.com/realinit/csvtojson/blob/master/index.html
+ https://realinit.github.io/csvtojson/
 
