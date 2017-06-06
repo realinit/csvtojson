@@ -65,7 +65,14 @@
 
                 fileInput.addEventListener('change', function (e) {
                     var file = fileInput.files[0];
+                    var csvtype = this.value.match(/\.(.+)$/)[1];
+                    
                     var textType = /text.*/;
+                    if(csvtype != "csv"){
+                        alert("File not supported!");
+                        document.getElementById("input").value = "File not supported!"
+                        return false;
+                    }
 
                     if (file.type.match(textType)) {
                         var reader = new FileReader();
